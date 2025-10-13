@@ -1,0 +1,170 @@
+[
+  {
+    "id": "1",
+    "document": "the document text for json1",
+    "metadata": {
+      "key": "value 1",
+      "additionalInfo": "info for 1"
+    }
+  },
+  {
+    "id": "2",
+    "document": "the document text for json2",
+    "metadata": {
+      "key": "value 2",
+      "additionalInfo": "info for 2"
+    }
+  },
+  {
+    "id": "3",
+    "document": "the document text for json3",
+    "metadata": {
+      "key": "value 3",
+      "additionalInfo": "info for 3"
+    }
+  },
+  {
+    "id": "4",
+    "document": "the document text for json4",
+    "metadata": {
+      "key": "value 4",
+      "additionalInfo": "info for 4"
+    }
+  },
+  {
+    "id": "5",
+    "document": "the document text for json5",
+    "metadata": {
+      "key": "value 5",
+      "additionalInfo": "info for 5"
+    }
+  },
+  {
+    "id": "6",
+    "document": "the document text for json6",
+    "metadata": {
+      "key": "value 6",
+      "additionalInfo": "info for 6"
+    }
+  },
+  {
+    "id": "7",
+    "document": "the document text for json7",
+    "metadata": {
+      "key": "value 7",
+      "additionalInfo": "info for 7"
+    }
+  },
+  {
+    "id": "8",
+    "document": "the document text for json8",
+    "metadata": {
+      "key": "value 8",
+      "additionalInfo": "info for 8"
+    }
+  },
+  {
+    "id": "9",
+    "document": "the document text for json9",
+    "metadata": {
+      "key": "value 9",
+      "additionalInfo": "info for 9"
+    }
+  },
+  {
+    "id": "10",
+    "document": "the document text for json10",
+    "metadata": {
+      "key": "value 10",
+      "additionalInfo": "info for 10"
+    }
+  },
+  {
+    "id": "11",
+    "document": "the document text for json11",
+    "metadata": {
+      "key": "value 11",
+      "additionalInfo": "info for 11"
+    }
+  },
+  {
+    "id": "12",
+    "document": "the document text for json12",
+    "metadata": {
+      "key": "value 12",
+      "additionalInfo": "info for 12"
+    }
+  },
+  {
+    "id": "13",
+    "document": "the document text for json13",
+    "metadata": {
+      "key": "value 13",
+      "additionalInfo": "info for 13"
+    }
+  },
+  {
+    "id": "14",
+    "document": "the document text for json14",
+    "metadata": {
+      "key": "value 14",
+      "additionalInfo": "info for 14"
+    }
+  },
+  {
+    "id": "15",
+    "document": "the document text for json15",
+    "metadata": {
+      "key": "value 15",
+      "additionalInfo": "info for 15"
+    }
+  },
+  {
+    "id": "16",
+    "document": "the document text for json16",
+    "metadata": {
+      "key": "value 16",
+      "additionalInfo": "info for 16"
+    }
+  },
+  {
+    "id": "17",
+    "document": "the document text for json17",
+    "metadata": {
+      "key": "value 17",
+      "additionalInfo": "info for 17"
+    }
+  },
+  {
+    "id": "18",
+    "document": "the document text for json18",
+    "metadata": {
+      "key": "value 18",
+      "additionalInfo": "info for 18"
+    }
+  },
+  {
+    "id": "19",
+    "document": "the document text for json19",
+    "metadata": {
+      "key": "value 19",
+      "additionalInfo": "info for 19"
+    }
+  },
+  {
+    "id": "20",
+    "document": "the document text for json20",
+    "metadata": {
+      "key": "value 20",
+      "additionalInfo": "info for 20"
+    }
+  },
+  {
+    "id": "21",
+    "document": "the document text for json21",
+    "metadata": {
+      "key": "value 21",
+      "additionalInfo": "info for 21"
+    }
+  }
+]

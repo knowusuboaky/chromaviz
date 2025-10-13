@@ -1,0 +1,124 @@
+{
+   "$contains": "value"
+}
+
+
+
+{
+   "$and": [
+      {"$contains": "value"}, 
+      {"$contains": "value"} 
+   ]
+}
+
+
+
+{
+   "$or": [
+      {"$contains": "value"}, 
+      {"$contains": "value"} 
+   ]
+}
+
+
+
+
+
+
+{
+   "$not_contains": "value"
+}
+
+
+
+{
+   "$and": [
+      {"$not_contains": "value"}, 
+      {"$not_contains": "value"} 
+   ]
+}
+
+
+
+{
+   "$or": [
+      {"$not_contains": "value"}, 
+      {"$not_contains": "value"} 
+   ]
+}
+
+
+
+
+
+{
+   "$and": [
+      {"$contains": "value1"}, 
+      {"$or": [ 
+            {"$contains": "value2"}, 
+            {"$not_contains": "value3"}
+         ]
+      },
+      {"$contains": "value1"}, 
+      {"$contains": "value1"}, 
+      {"$and": [ 
+            {"$contains": "value2"}, 
+            {"$not_contains": "value3"}
+         ]
+      },
+      {"$contains": "value1"}, 
+      {"$contains": "value1"}
+   ]
+}
+
+
+
+
+
+
+
+
+
+
+{
+   "metadatafield": {"$eq": "value"}
+}
+
+
+
+{
+   "metadatafield": {"$ne": "value"}
+}
+
+
+
+{
+   "$or": [
+      {"metadatafield": {"$ne": "value"}}, 
+      {"metadatafield": {"$ne": "value"}}
+   ]
+}
+
+
+
+{
+   "$and": [
+      {"metadatafield": {"$ne": "value"}}, 
+      {"metadatafield": {"$ne": "value"}}
+   ]
+}
+
+
+
+
+{
+   "$and": [
+      {"metadatafield": "value1"}, 
+      {"$or": [ 
+            {"metadatafield": "value2"}, 
+            {"metadatafield": "value3"}
+         ]
+      }
+   ]
+}
+

@@ -1,0 +1,44 @@
+version: "3.8"
+
+services:
+  chroma-suite:
+    build: .
+    image: yourorg/chroma-suite:latest
+    container_name: chroma-suite
+    ports:
+      - "8000:80"   # single external port
+    environment:
+      # --- Chroma server ---
+      CHROMA_SERVER_HOST: "0.0.0.0"
+      CHROMA_SERVER_HTTP_PORT: "8000"
+      CHROMA_DATA_PATH: "/data"
+      ANONYMIZED_TELEMETRY: "False"
+
+      # --- App/UI (optional overrides) ---
+      PUBLIC_HOST: "localhost"     # your app uses this to build links
+      PUBLIC_PORT: "8000"
+      CHROMA_MODE: "http"          # your Flask code will use the HTTP Chroma client
+      CHROMA_HTTP_HOST: "127.0.0.1"
+      CHROMA_HTTP_PORT: "8000"
+      EMBEDDING_MODEL: "all-MiniLM-L6-v2"
+      EMBEDDING_MODEL_PATH: "/app/models/all-MiniLM-L6-v2"
+      CONTINUE_WITHOUT_EMBEDDINGS: "true"
+      AUTO_OPEN_BROWSER: "false"
+      GUNICORN_WORKERS: "2"
+      UI_MODULE: "app:app"         # if your file isn't app.py, set "yourmodule:app"
+
+      # Optional outgoing proxies for HF/model downloads
+      # HTTP_PROXY: "http://your-proxy:3128"
+      # HTTPS_PROXY: "http://your-proxy:3128"
+
+    volumes:
+      - chroma-data:/data           # Chroma persistence
+      - models-cache:/app/models    # sentence-transformers cache
+      # If you want to pin your appsettings.json, uncomment:
+      # - ./appsettings.json:/app/appsettings.json:rw
+
+    restart: unless-stopped
+
+volumes:
+  chroma-data:
+  models-cache:

@@ -1,1 +1,1 @@
-# chromadb
+# chromaviz

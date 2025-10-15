@@ -1,57 +1,50 @@
-# ---- base image ----
 FROM python:3.11-slim
 
-# System deps: nginx + supervisor + build basics
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    nginx supervisor build-essential curl ca-certificates \
- && rm -rf /var/lib/apt/lists/*
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PIP_NO_CACHE_DIR=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1
 
-# Clean default nginx sites to avoid conflicts
-RUN rm -f /etc/nginx/sites-enabled/default /etc/nginx/conf.d/default.conf || true
+RUN useradd -m -u 1000 appuser && \
+    apt-get update && apt-get install -y --no-install-recommends curl && \
+    rm -rf /var/lib/apt/lists/*
 
-# App layout
 WORKDIR /app
 
-# ----- Python deps (cached) -----
-# Copy requirements first to maximize Docker layer caching
+# ---- deps via requirements.txt ----
 COPY requirements.txt /tmp/requirements.txt
-RUN pip install --no-cache-dir --upgrade pip \
- && pip install --no-cache-dir -r /tmp/requirements.txt
+ARG TORCH_CPU=false
+RUN python -m pip install --upgrade pip && \
+    if [ "$TORCH_CPU" = "true" ]; then \
+      python -m pip install --no-cache-dir \
+        --index-url https://download.pytorch.org/whl/cpu \
+        torch torchvision torchaudio ; \
+    fi && \
+    python -m pip install --no-cache-dir -r /tmp/requirements.txt
 
-# Copy your app (must include static/ and chromaviz/ assets)
+# ---- app code ----
 COPY . /app
 
-# Nginx + Supervisor configs
-COPY deploy/nginx.conf /etc/nginx/conf.d/default.conf
-COPY deploy/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
-
-# Runtime dirs
-RUN mkdir -p /data /app/models /run/nginx
-
-# Defaults (overridable via env or docker-compose)
-ENV CHROMA_SERVER_HOST=0.0.0.0 \
-    CHROMA_SERVER_HTTP_PORT=8000 \
-    CHROMA_DATA_PATH=/data \
-    ANONYMIZED_TELEMETRY=False \
-    # ---- UI/env defaults ----
-    FLASK_SERVER_ENDPOINT=http://0.0.0.0:5000 \
+# ---- env defaults (override with -e) ----
+ENV FLASK_SERVER_ENDPOINT=http://0.0.0.0:5000 \
     PUBLIC_HOST=localhost \
-    PUBLIC_PORT=8000 \
-    CHROMA_MODE=http \
-    CHROMA_HTTP_HOST=127.0.0.1 \
-    CHROMA_HTTP_PORT=8000 \
+    PUBLIC_PORT=5000 \
+    CHROMA_MODE=persistent \
+    CHROMA_DB_PATH=/app/chroma-data \
+    EMBEDDINGS_MODE=local \
     EMBEDDING_MODEL=all-MiniLM-L6-v2 \
     EMBEDDING_MODEL_PATH=/app/models/all-MiniLM-L6-v2 \
-    CONTINUE_WITHOUT_EMBEDDINGS=true \
+    HF_HOME=/app/models \
     AUTO_OPEN_BROWSER=false \
-    GUNICORN_WORKERS=2 \
-    UI_MODULE=app:app
+    APP_FILE=app.py
 
-# Nginx listens on 80 in the container
-EXPOSE 80
+RUN mkdir -p /app/chroma-data /app/models && chown -R appuser:appuser /app
+USER appuser
 
-# Healthcheck hits your Flask heartbeat via Nginx prefix
-HEALTHCHECK --interval=30s --timeout=5s --start-period=20s \
-  CMD curl -fsS http://127.0.0.1/dashboard/heartbeat || exit 1
+# Expose ONLY Flask
+EXPOSE 5000
 
-CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
+HEALTHCHECK --interval=30s --timeout=5s --retries=5 \
+  CMD curl -fsS http://127.0.0.1:5000/heartbeat || exit 1
+
+CMD ["sh", "-lc", "python ${APP_FILE}"]

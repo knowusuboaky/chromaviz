@@ -1,6 +1,6 @@
 import requests
 from typing import List, Optional, Dict, Any
-from flask import Flask, jsonify, request, render_template
+from flask import Flask, jsonify, request, render_template, send_from_directory
 import chromadb
 from chromadb.utils import embedding_functions
 from chromadb.config import Settings
@@ -30,14 +30,17 @@ import random
 
 # Static variable, i update this manually each time i make a change
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-appversion_flask = "1.0.0.3000"
+appversion_flask = "1.0.0+3000"
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
 
 
 # Initialize Flask app
-app = Flask(__name__)
+# app = Flask(__name__)
+
+# point Flask at your real static dir
+app = Flask(__name__, static_folder="static")  # static_url_path defaults to "/static"
 
 
 
@@ -2312,13 +2315,3 @@ def chromadb_path_sqllite():
         # Keep the shape the same so the front-end can still show something
         return jsonify({"chromadb_path_sqllite": f"Error: {e}"}), 200
 
-
-
-
-# Run the app locally
-if __name__ == '__main__':
-    # Start a separate thread to open the browser
-    threading.Thread(target=open_browser).start()
-
-    # Disable Flask's debugger reloader (prevents it from re-running the connection check)
-    app.run(host=host_flask, debug=True, port=port_flask, use_reloader=False)

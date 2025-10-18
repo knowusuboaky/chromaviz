@@ -24,3 +24,87 @@ services:
       timeout: 5s
       retries: 5
     restart: unless-stopped
+
+
+
+# # ===========================================================
+# # Docker Compose: ChromaDB API + ChromaViz UI (no proxy)
+# # Ports: Chroma -> host:8000, ChromaViz UI -> host:5000
+# # ===========================================================
+# version: "3.8"
+
+# services:
+#   # ---------------------------------------------------------
+#   # SERVICE: Chroma (Vector DB HTTP API)
+#   # - Exposes API on http://localhost:8000
+#   # - Persists DB files to the 'chroma-data' volume
+#   # ---------------------------------------------------------
+#   chroma:
+#     image: chromadb/chroma:latest
+#     container_name: chroma
+#     environment:
+#       CHROMA_SERVER_HOST: "0.0.0.0"     # bind inside container
+#       CHROMA_SERVER_HTTP_PORT: "8000"   # internal port
+#       ANONYMIZED_TELEMETRY: "False"
+#     volumes:
+#       - chroma-data:/data               # persistence for Chroma
+#     ports:
+#       - "8000:8000"                     # host:container
+#     restart: unless-stopped
+
+#   # ---------------------------------------------------------
+#   # SERVICE: ChromaViz (Flask UI / API Layer)
+#   # - UI available at http://localhost:5000
+#   # - Connects to Chroma via Docker network (service name "chroma")
+#   # - Model cache persisted in 'models-cache' volume
+#   # ---------------------------------------------------------
+#   chromaviz:
+#     image: ghcr.io/knowusuboaky/chromaviz:latest
+#     container_name: chromaviz
+
+#     # --------- Runtime configuration for the UI ----------
+#     environment:
+#       # Flask app bind
+#       FLASK_SERVER_ENDPOINT: "http://0.0.0.0:5000"
+
+#       # Public values used to build links in the UI
+#       PUBLIC_HOST: "localhost"
+#       PUBLIC_PORT: "5000"
+
+#       # Talk to Chroma over HTTP (via docker network)
+#       CHROMA_MODE: "http"
+#       CHROMA_HTTP_HOST: "chroma"
+#       CHROMA_HTTP_PORT: "8000"
+
+#       # Display the server's data path in the UI (optional in HTTP mode)
+#       CHROMA_DB_PATH: "/data"
+
+#       # Embeddings (local Sentence-Transformers)
+#       EMBEDDINGS_MODE: "local"
+#       EMBEDDING_MODEL: "all-MiniLM-L6-v2"
+#       EMBEDDING_MODEL_PATH: "/app/models/all-MiniLM-L6-v2"
+#       EMBEDDING_CONTEXT_WINDOW: "1024"
+#       HF_HOME: "/app/models"
+
+#       AUTO_OPEN_BROWSER: "false"
+
+#     volumes:
+#       - models-cache:/app/models         # persist model downloads
+#       - chroma-data:/data                # visible path for UI display
+
+#     depends_on:
+#       - chroma
+
+#     ports:
+#       - "5000:5000"                      # UI only
+
+#     restart: unless-stopped
+
+# # -----------------------------------------------------------
+# # NAMED VOLUMES
+# # - chroma-data: ChromaDB persistence
+# # - models-cache: sentence-transformers cache
+# # -----------------------------------------------------------
+# volumes:
+#   chroma-data:
+#   models-cache:

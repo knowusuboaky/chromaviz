@@ -290,13 +290,19 @@ def make_chroma_client():
     if mode == "http":
         host = os.getenv("CHROMA_HTTP_HOST", "127.0.0.1")
         port = int(os.getenv("CHROMA_HTTP_PORT", "8000"))
-        print(f"Connecting to Chroma HTTP at {host}:{port}")
-        return chromadb.HttpClient(host=host, port=port)
+        print(f"Connecting to Chroma REST at {host}:{port}")
+        return chromadb.Client(
+            Settings(
+                chroma_api_impl="rest",
+                chroma_server_host=host,
+                chroma_server_http_port=port,
+            )
+        )
     else:
         os.makedirs(CHROMA_DATA_PATH, exist_ok=True)
         print(f"Using local PersistentClient at: {CHROMA_DATA_PATH}")
         return chromadb.PersistentClient(path=CHROMA_DATA_PATH)
-
+    
 persistentChromaClient = make_chroma_client()
 
 
@@ -754,20 +760,92 @@ def flask_heartbeat():
 
 def list_collection_names_safe(client) -> List[str]:
     """
-    Returns collection names across Chroma versions:
-    - v0.6+: list_collections() -> List[str]
-    - v0.5.x: list_collections() -> List[Collection] (with .name)
+    Return collection names across Chroma versions:
+      - v2 REST/SDK: may return objects/dicts with .name / ["name"]
+      - v0.6+: list[str]
+      - v0.5.x: list[Collection] (with .name)
+    Falls back to GET /api/v2/collections when client.list_collections() fails.
     """
-    cols = client.list_collections()
-    names = []
-    for c in cols:
-        if isinstance(c, str):
-            names.append(c)
-        else:
-            name = getattr(c, "name", None)
-            if name:
-                names.append(name)
-    return names
+    names: List[str] = []
+
+    # 1) Try the client first (covers SDKs across versions)
+    try:
+        cols = client.list_collections()
+    except Exception:
+        cols = None
+
+    if cols is not None:
+        for c in cols:
+            # Already a string
+            if isinstance(c, str):
+                names.append(c)
+                continue
+
+            # Dict-like
+            if isinstance(c, dict):
+                nm = c.get("name")
+                if nm:
+                    names.append(str(nm))
+                continue
+
+            # Object with attribute .name
+            nm = getattr(c, "name", None)
+            if nm:
+                names.append(str(nm))
+                continue
+
+            # Pydantic-style .dict()
+            try:
+                d = c.dict() if hasattr(c, "dict") else None
+            except Exception:
+                d = None
+            if isinstance(d, dict) and d.get("name"):
+                names.append(str(d["name"]))
+                continue
+
+            # Last-ditch mapping coercion
+            try:
+                d2 = dict(c)
+                nm = d2.get("name")
+                if nm:
+                    names.append(str(nm))
+            except Exception:
+                pass
+
+        # de-dupe, strip empties, preserve order
+        seen = set()
+        out = []
+        for n in names:
+            n = (str(n) if n is not None else "").strip()
+            if n and n not in seen:
+                seen.add(n)
+                out.append(n)
+        return out
+
+    # 2) Fallback to raw REST (v2)
+    try:
+        import os, requests
+        host = os.getenv("CHROMA_HTTP_HOST", "127.0.0.1")
+        port = os.getenv("CHROMA_HTTP_PORT", "8000")
+        r = requests.get(f"http://{host}:{port}/api/v2/collections", timeout=5)
+        r.raise_for_status()
+        data = r.json() or []
+        for c in data:
+            if isinstance(c, dict) and c.get("name"):
+                names.append(str(c["name"]))
+    except Exception:
+        pass
+
+    # de-dupe/clean on fallback path too
+    seen = set()
+    out = []
+    for n in names:
+        n = (str(n) if n is not None else "").strip()
+        if n and n not in seen:
+            seen.add(n)
+            out.append(n)
+    return out
+
 
 @app.route('/get-collections', methods=['GET'])
 def get_collections():
